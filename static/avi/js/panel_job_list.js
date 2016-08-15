@@ -24,7 +24,7 @@ var jobTable;
 function setup_jobtable(){
     jobTable = $('#job_table').DataTable({
         "ajax": {
-            "url": "/avi/job_list/.json", 
+            "url": "job_list/.json", 
             "dataSrc": ""
         },
         "columns": [
