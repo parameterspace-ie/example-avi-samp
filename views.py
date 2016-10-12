@@ -28,8 +28,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.views.decorators.http import require_http_methods
 
-from avi.models import DemoModel
-
 ROLES = settings.GAVIP_ROLES
 
 logger = logging.getLogger(__name__)
