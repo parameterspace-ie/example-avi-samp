@@ -28,9 +28,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.views.decorators.http import require_http_methods
 
-from avi.models import DemoModel
-
-from gavip_avi.decorators import require_gavip_role  # use this to restrict access to views in an AVI
 ROLES = settings.GAVIP_ROLES
 
 logger = logging.getLogger(__name__)
@@ -43,57 +40,9 @@ def index(request):
     'millis' and 'standalone' variables.
     """
     context = {
-        "millis": int(round(time.time() * 1000)),
-        "standalone": False, # This stops the base template rendering the navbar on top
         "show_welcome": request.session.get('show_welcome', True)
     }
     request.session['show_welcome'] = False
     return render(request, 'avi/index.html', context)
 
-
-@require_http_methods(["POST"])
-def run_query(request):
-    """
-    This is called when the user submits their job parameters in
-    their interface.
-
-    We pull the parameters from the request POST parameters.
-
-    We create an avi_job_request, which must be used to create
-    the DemoModel instance, so that the pipeline can excercise
-    the pipeline correctly.
-
-    We attach the job_request instance to th DemoModel; this 
-    extends the AviJob class, which is required for pipeline
-    processing.
-
-    We start the job using the job_request ID, and return the 
-    ID to the user so they can view progress.
-    """
-    outfile = request.POST.get("outfile")
-    adql_query = request.POST.get("query")
-
-    job = DemoModel.objects.create(
-        query=adql_query,
-        outputFile=outfile
-    )
-    return JsonResponse({})
-
-
-@require_http_methods(["GET"])
-def job_result(request, job_id):
-    return render(request, 'avi/job_result.html', {'job_id': job_id})
-
-
-@require_http_methods(["GET"])
-def job_result_public(request, job_id, celery_task_id):
-    """
-    @req: REQ-0035
-    @comp: AVI Authentication and Authorization
-    """
-    job = get_object_or_404(DemoModel, request_id=job_id)
-    if celery_task_id == job.request.celery_task_id:
-        return job_result(request, job_id)
-    else:
-        raise ObjectDoesNotExist("Invalid public URL")
 
